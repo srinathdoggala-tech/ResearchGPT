@@ -4,13 +4,11 @@
   "version": "1.0.0",
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
-    "dev": "concurrently \"npm --prefix frontend run dev\" \"npm --prefix backend run dev || npm --prefix backend run start\"",
+    "dev": "npm --prefix frontend run dev",
     "install-all": "npm --prefix frontend install && npm --prefix backend install || true"
   },
   "engines": {
     "node": "18.x"
   }
-  ,"devDependencies": {
-    "concurrently": "^8.2.0"
-  }
+  
 }
