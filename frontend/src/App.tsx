@@ -1,0 +1,135 @@
+import React, { useState } from 'react'
+import './App.css'
+import SearchForm from './components/SearchForm'
+import ResultsDisplay from './components/ResultsDisplay'
+import LoadingSpinner from './components/LoadingSpinner'
+
+interface ResearchResult {
+  status: string
+  topic: string
+  plan: any
+  findings: any
+  verification: any
+  report: any
+}
+
+function App() {
+  const [results, setResults] = useState<ResearchResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [currentTopic, setCurrentTopic] = useState('')
+
+  const handleSearch = async (topic: string, style: string, includeVerification: boolean) => {
+    setLoading(true)
+    setError(null)
+    setCurrentTopic(topic)
+
+    try {
+      const response = await fetch('http://localhost:8000/api/research', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic,
+          style,
+          include_verification: includeVerification,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Research failed: ${response.statusText}`)
+      }
+
+      const data: ResearchResult = await response.json()
+      setResults(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      setResults(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleQuickSearch = async (topic: string) => {
+    setLoading(true)
+    setError(null)
+    setCurrentTopic(topic)
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/research/quick?topic=${encodeURIComponent(topic)}&max_results=5`,
+        {
+          method: 'POST',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Quick research failed: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      setResults({
+        status: 'success',
+        topic,
+        plan: { research_questions: [] },
+        findings: data,
+        verification: null,
+        report: { report: data.findings },
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      setResults(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <header className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1 className="text-4xl font-bold text-indigo-600">ResearchGPT</h1>
+          <p className="text-gray-600 mt-2">Multi-Agent AI Research Assistant</p>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Search Panel */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Research</h2>
+              <SearchForm
+                onSearch={handleSearch}
+                onQuickSearch={handleQuickSearch}
+                loading={loading}
+              />
+            </div>
+          </div>
+
+          {/* Results Panel */}
+          <div className="lg:col-span-2">
+            {loading && <LoadingSpinner currentTopic={currentTopic} />}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                <h3 className="font-bold mb-2">Error</h3>
+                <p>{error}</p>
+              </div>
+            )}
+            {results && !loading && <ResultsDisplay results={results} />}
+            {!loading && !error && !results && (
+              <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+                <p className="text-gray-500 text-lg">
+                  Enter a topic and start researching to see results here
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default App
