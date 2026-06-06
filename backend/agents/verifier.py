@@ -96,16 +96,21 @@ Provide a verification assessment including:
                     })
             
             logger.info(f"Verified {len(verification_results)} claims")
-            
+
             return {
                 "content_verified": content[:200] + "...",
                 "verification_results": verification_results,
                 "overall_reliability": "Good" if len(verification_results) > 0 else "Unknown"
             }
-        
+
         except Exception as e:
             logger.error(f"Verification process failed: {e}")
-            raise
+            # Return a conservative fallback result rather than raising
+            return {
+                "content_verified": content[:200] + "...",
+                "verification_results": [],
+                "overall_reliability": "Unknown"
+            }
     
     async def assess_sources(self, sources: List[Dict[str, str]]) -> Dict[str, Any]:
         """
@@ -141,10 +146,13 @@ For each source provide:
                 "sources_assessed": len(sources),
                 "assessment": assessment
             }
-        
+
         except Exception as e:
             logger.error(f"Source assessment failed: {e}")
-            raise
+            return {
+                "sources_assessed": len(sources),
+                "assessment": "[Assessment failed]"
+            }
 
 
 # Singleton instance

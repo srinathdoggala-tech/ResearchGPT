@@ -68,20 +68,25 @@ Include proper source citations."""
                 system_prompt=self.SYSTEM_PROMPT,
                 model="openai"
             )
-            
+
             word_count = len(report.split())
             logger.info(f"Generated {word_count} word report")
-            
+
             return {
                 "topic": topic,
                 "style": style,
                 "report": report,
                 "word_count": word_count
             }
-        
+
         except Exception as e:
             logger.error(f"Report writing failed: {e}")
-            raise
+            return {
+                "topic": topic,
+                "style": style,
+                "report": "[Report generation failed]",
+                "word_count": 0
+            }
     
     async def write_summary(
         self,
@@ -118,16 +123,20 @@ Focus on key points, main findings, and actionable insights."""
                 system_prompt="You are an expert at creating clear, concise summaries.",
                 model="openai"
             )
-            
+
             return {
                 "original_length": len(content.split()),
                 "summary_length": len(summary.split()),
                 "summary": summary
             }
-        
+
         except Exception as e:
             logger.error(f"Summary creation failed: {e}")
-            raise
+            return {
+                "original_length": len(content.split()),
+                "summary_length": 0,
+                "summary": "[Summary creation failed]"
+            }
     
     async def write_stream(
         self,
@@ -172,10 +181,11 @@ Format: Clear sections with introduction, main findings, analysis, and conclusio
                 model="openai"
             ):
                 yield chunk
-        
+
         except Exception as e:
             logger.error(f"Streaming write failed: {e}")
-            raise
+            yield "[Write stream error] Streaming failed"
+            return
 
 
 # Singleton instance

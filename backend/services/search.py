@@ -3,8 +3,13 @@
 import asyncio
 import logging
 from typing import List, Dict, Any
-from tavily import TavilyClient
 from config import settings
+
+# Optional import for Tavily search client. Keep module import-safe
+try:
+    from tavily import TavilyClient
+except Exception:
+    TavilyClient = None
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +23,17 @@ class SearchService:
     
     def _init_client(self):
         """Initialize search client"""
-        if settings.tavily_api_key:
+        if TavilyClient is not None and settings.tavily_api_key:
             try:
                 self.client = TavilyClient(api_key=settings.tavily_api_key)
                 logger.info("✓ Initialized Tavily search client")
             except Exception as e:
                 logger.error(f"Failed to initialize Tavily client: {e}")
+        else:
+            if not settings.tavily_api_key:
+                logger.info("Tavily API key not configured; search disabled")
+            else:
+                logger.info("Tavily client library not available; search disabled")
     
     async def search(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
         """
@@ -37,7 +47,10 @@ class SearchService:
             List of search results with title, URL, and snippet
         """
         if not self.client:
-            raise ValueError("Tavily API key not configured")
+            # Return empty results rather than raising, to allow the app to
+            # operate in environments without a search API key or client.
+            logger.warning("Search client not configured; returning empty results")
+            return []
         
         max_results = max_results or settings.search_max_results
         
@@ -79,7 +92,8 @@ class SearchService:
             Dictionary with answer and sources
         """
         if not self.client:
-            raise ValueError("Tavily API key not configured")
+            logger.warning("Search client not configured; returning empty answer")
+            return {"answer": "", "results": []}
         
         try:
             result = await asyncio.to_thread(

@@ -331,6 +331,35 @@ MIT License - see [LICENSE](LICENSE) for details
 - Built with [LangChain](https://python.langchain.com/)
 - Powered by [OpenAI](https://openai.com/) and [Anthropic](https://anthropic.com/)
 - Search via [Tavily](https://tavily.com/)
+
+## CI and Running Tests
+
+This repository includes a GitHub Actions workflow that runs the backend test suite and builds the backend Docker image on push and pull requests. The workflow is at `.github/workflows/ci.yml`.
+
+To run tests locally for the backend:
+
+```bash
+python -m venv .venv
+# Windows (PowerShell):
+.venv\Scripts\Activate.ps1
+# macOS/Linux:
+# source .venv/bin/activate
+
+pip install -U pip
+pip install -r backend/requirements.txt
+cd backend
+pytest -q
+```
+
+If you don't have API keys (OpenAI / Anthropic / Tavily), the code is resilient and tests may skip or accept 500 responses for endpoints that rely on external APIs. To enable full functionality, populate the env variables as described in `.env.example`.
+
+Alternatively, run tests inside Docker (no local Python required):
+
+```bash
+./run_tests_in_docker.sh
+# On Windows PowerShell:
+./run_tests_in_docker.ps1
+```
 - Framework: [FastAPI](https://fastapi.tiangolo.com/)
 
 ## 📞 Support

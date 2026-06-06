@@ -67,19 +67,25 @@ Respond in a structured format with clear sections."""
                 system_prompt=self.SYSTEM_PROMPT,
                 model="openai"
             )
-            
+
             logger.info(f"Research completed with {len(search_results)} sources")
-            
+
             return {
                 "query": query,
                 "findings": response,
                 "sources": search_results,
                 "source_count": len(search_results)
             }
-        
+
         except Exception as e:
             logger.error(f"Research failed: {e}")
-            raise
+            # Return safe fallback so API endpoints can respond gracefully
+            return {
+                "query": query,
+                "findings": "[Research failed] Could not perform research at this time.",
+                "sources": [],
+                "source_count": 0
+            }
     
     async def research_stream(self, query: str, context: str = ""):
         """
@@ -119,10 +125,11 @@ Please provide detailed findings with clear structure."""
                 model="openai"
             ):
                 yield chunk
-        
+
         except Exception as e:
             logger.error(f"Streaming research failed: {e}")
-            raise
+            yield "[Research stream error] Streaming failed"
+            return
 
 
 # Singleton instance

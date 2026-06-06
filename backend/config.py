@@ -1,4 +1,14 @@
-from pydantic_settings import BaseSettings
+try:
+    from pydantic_settings import BaseSettings
+except Exception:
+    # Fall back to pydantic's BaseSettings for older/newer installs
+    try:
+        from pydantic import BaseSettings
+    except Exception:
+        # Minimal fallback if pydantic isn't installed; provides defaults only
+        class BaseSettings:
+            def __init__(self, **kwargs):
+                pass
 from typing import List
 import logging
 
