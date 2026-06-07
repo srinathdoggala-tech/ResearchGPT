@@ -1,14 +1,11 @@
 """
 Verifier Agent - Validates and fact-checks research findings
 """
-
 import logging
 from typing import Dict, Any
-
 from services.search import search_service
 
 logger = logging.getLogger(__name__)
-
 
 class VerifierAgent:
     """
