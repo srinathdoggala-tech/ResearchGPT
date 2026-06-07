@@ -1,80 +1,86 @@
-"""Main FastAPI Application"""
+"""
+ResearchGPT FastAPI Application
+"""
 
 import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+
 from config import settings
 from api.routes import router
 
-logger = logging.getLogger(__name__)
+# Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger("researchgpt")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan context manager for startup and shutdown events"""
-    # Startup
-    logger.info("🚀 Starting ResearchGPT API...")
-    logger.info(f"Debug mode: {settings.debug}")
+    logger.info("🚀 Starting ResearchGPT API")
+    logger.info(f"Debug Mode: {settings.debug}")
     logger.info(f"LLM Model: {settings.llm_model}")
+
     yield
-    # Shutdown
-    logger.info("👋 Shutting down ResearchGPT API...")
+
+    logger.info("👋 Shutting down ResearchGPT API")
 
 
-# Create FastAPI app
 app = FastAPI(
-    title="ResearchGPT",
-    description="Multi-Agent AI Research Assistant API",
+    title="ResearchGPT API",
+    description="Multi-Agent AI Research Assistant",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
 )
 
-# Add CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "*"
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routes
+# API Routes
 app.include_router(router)
 
-
+# Root Endpoint
 @app.get("/")
 async def root():
-    """Root endpoint"""
     return {
-        "message": "Welcome to ResearchGPT",
+        "message": "ResearchGPT API Running",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/api/health"
+        "health": "/health",
     }
 
 
+# Health Check
 @app.get("/health")
 async def health():
-    """Health check endpoint"""
     return {
         "status": "healthy",
-        "service": "ResearchGPT API",
-        "version": "1.0.0"
+        "service": "ResearchGPT",
+        "version": "1.0.0",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.debug,
-        workers=1 if settings.debug else settings.workers,
-        log_level=settings.log_level.lower()
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
     )

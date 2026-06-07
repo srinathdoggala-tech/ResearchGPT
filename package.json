@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
-    "dev": "npm --prefix frontend run dev",
+    "dev": "npm --prefix frontend install && npm --prefix frontend run dev",
     "dev:compose": "docker-compose up --build",
     "dev:compose:detached": "docker-compose up --build -d",
     "install-all": "npm --prefix frontend install && npm --prefix backend install || true"
