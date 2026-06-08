@@ -1,14 +1,28 @@
 {
-"version": 2,
-"functions": {
-"backend/main.py": {
-"runtime": "python3.11"
-}
-},
-"routes": [
-{
-"src": "/api/(.*)",
-"dest": "backend/main.py"
-}
-]
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": { "maxDuration": 30 }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ]
 }

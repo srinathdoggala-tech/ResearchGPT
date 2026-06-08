@@ -13,7 +13,7 @@ from agents.verifier import verifier_agent
 from agents.writer import writer_agent
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/api", tags=["research"])
+router = APIRouter(tags=["research"])
 
 
 class ResearchRequest(BaseModel):

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SearchForm from "./components/SearchForm";
 import ResultsDisplay from "./components/ResultsDisplay";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -39,7 +39,7 @@ interface ResearchResult {
 }
 
 // Dynamically requests relative paths when sharing the same host domain layout on Vercel
-const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
