@@ -44,7 +44,7 @@ app.add_middleware(
 )
 
 # Include Core Multi-Agent Base Router
-app.include_router(router)
+app.include_router(router, prefix="/api")
 
 @app.get("/")
 async def root():

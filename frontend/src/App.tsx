@@ -38,7 +38,9 @@ interface ResearchResult {
   report: ResearchReport;
 }
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "";
+const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_URL ||
+  "http://localhost:8000";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
@@ -67,7 +69,7 @@ function App() {
 
     try {
       // Connect directly to the streaming endpoint to bypass Vercel serverless timeouts
-      const response = await fetch(`${API_BASE_URL}/api/research/stream`, {
+      const response = await fetch(`${API_BASE_URL}/research/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +157,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/research/quick?topic=${encodeURIComponent(
+        `${API_BASE_URL}/research/quick?topic=${encodeURIComponent(
           topic
         )}&max_results=5`,
         {
