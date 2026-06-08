@@ -10,7 +10,7 @@
     "install-all": "npm --prefix frontend install && npm --prefix backend install || true"
   },
   "engines": {
-    "node": "18.x"
+    "node": "22.x"
   }
   
 }
