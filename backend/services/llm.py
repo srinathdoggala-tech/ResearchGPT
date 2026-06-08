@@ -1,5 +1,7 @@
 import logging
+import asyncio
 from typing import Optional
+
 import google.generativeai as genai
 
 from config import settings
@@ -20,6 +22,7 @@ class LLMService:
 
             genai.configure(api_key=settings.gemini_api_key)
 
+            # Recommended free-tier model
             model_name = settings.llm_model or "gemini-1.5-flash"
 
             self.model = genai.GenerativeModel(model_name)
@@ -36,22 +39,56 @@ class LLMService:
         model: str = "gemini",
     ) -> str:
 
-        try:
-            if not self.model:
-                return "[Gemini not configured]"
+        if not self.model:
+            return "[Gemini not configured]"
 
-            final_prompt = prompt
+        final_prompt = prompt
 
-            if system_prompt:
-                final_prompt = f"{system_prompt}\n\n{prompt}"
+        if system_prompt:
+            final_prompt = f"{system_prompt}\n\n{prompt}"
 
-            response = self.model.generate_content(final_prompt)
+        max_retries = 3
 
-            return response.text
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content(final_prompt)
 
-        except Exception as e:
-            logger.error(f"Gemini generation failed: {e}")
-            return f"[LLM ERROR]\n{str(e)}"
+                if hasattr(response, "text"):
+                    return response.text
+
+                return "[No response generated]"
+
+            except Exception as e:
+                error_msg = str(e)
+
+                logger.error(
+                    f"Gemini generation failed (attempt {attempt + 1}/{max_retries}): {error_msg}"
+                )
+
+                # Handle Gemini quota/rate-limit errors
+                if (
+                    "429" in error_msg
+                    or "quota" in error_msg.lower()
+                    or "rate limit" in error_msg.lower()
+                ):
+                    if attempt < max_retries - 1:
+                        wait_time = 20 * (attempt + 1)
+
+                        logger.warning(
+                            f"Rate limit hit. Waiting {wait_time}s before retry..."
+                        )
+
+                        await asyncio.sleep(wait_time)
+                        continue
+
+                    return (
+                        "AI quota limit reached. "
+                        "Please wait a minute and try again."
+                    )
+
+                return f"[LLM ERROR]\n{error_msg}"
+
+        return "[LLM ERROR] Maximum retries exceeded."
 
     async def stream_text(
         self,
@@ -79,6 +116,7 @@ class LLMService:
                     yield chunk.text
 
         except Exception as e:
+            logger.error(f"Stream generation failed: {e}")
             yield f"[STREAM ERROR] {str(e)}"
 
 
