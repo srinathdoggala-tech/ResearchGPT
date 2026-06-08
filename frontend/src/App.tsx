@@ -37,9 +37,8 @@ interface ResearchResult {
   verification: any;
   report: ResearchReport;
 }
-
-// Dynamically requests relative paths when sharing the same host domain layout on Vercel
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+// Explicitly cast import.meta as 'any' to bypass strict compiler checking for Vite types
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
