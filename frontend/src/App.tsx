@@ -3,17 +3,43 @@ import SearchForm from "./components/SearchForm";
 import ResultsDisplay from "./components/ResultsDisplay";
 import LoadingSpinner from "./components/LoadingSpinner";
 
+interface ResearchPlan {
+  research_questions: string[];
+  research_plan?: Array<{
+    step: number;
+    task: string;
+    key_focus: string;
+  }>;
+  estimated_duration?: string;
+}
+
+interface ResearchFindings {
+  findings: string;
+  sources: Array<{
+    title: string;
+    url: string;
+    snippet: string;
+  }>;
+}
+
+interface ResearchReport {
+  report: string;
+  word_count: number;
+  topic?: string;
+  style?: string;
+}
+
 interface ResearchResult {
   status: string;
   topic: string;
-  plan: any;
-  findings: any;
+  plan: ResearchPlan;
+  findings: ResearchFindings;
   verification: any;
-  report: any;
+  report: ResearchReport;
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Dynamically requests relative paths when sharing the same host domain layout on Vercel
+const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
@@ -49,7 +75,7 @@ function App() {
 
       const data: ResearchResult = await response.json();
       setResults(data);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Unexpected error occurred"
       );
@@ -84,13 +110,17 @@ function App() {
         status: "success",
         topic,
         plan: { research_questions: [] },
-        findings: data,
+        findings: {
+          findings: data?.findings ?? "",
+          sources: data?.sources ?? []
+        },
         verification: null,
         report: {
-          report: data?.findings ?? [],
+          report: data?.findings ?? "",
+          word_count: data?.findings ? String(data.findings).split(/\s+/).filter(Boolean).length : 0
         },
       });
-    } catch (err) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Unexpected error occurred"
       );
