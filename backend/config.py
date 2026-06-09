@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     anthropic_api_key: str = ""
 
-    llm_model: str = "gemini-2.5-flash"
+    llm_model: str = "gemini-1.5-flash"
     temperature: float = 0.7
 
     # Search

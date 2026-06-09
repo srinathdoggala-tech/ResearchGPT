@@ -73,7 +73,7 @@ function App() {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/research/stream`, {
+      const response = await fetch(`${API_BASE_URL}/api/research/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -185,7 +185,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/research/quick?topic=${encodeURIComponent(
+  `${API_BASE_URL}/api/research/quick?topic=${encodeURIComponent(
           topic
         )}&max_results=5`,
         {
