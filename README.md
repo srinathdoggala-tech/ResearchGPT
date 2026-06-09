@@ -93,9 +93,10 @@ docker-compose up
 ```
 
 Access the application:
+-vercel Deployment:research-gpt-rg4i.vercel.app
 - Frontend: http://localhost:5173
 - API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+
 
 ### Manual Backend Setup
 
@@ -368,7 +369,7 @@ Alternatively, run tests inside Docker (no local Python required):
 - 💬 Discussions: [GitHub Discussions](https://github.com/srinathdoggala-tech/ResearchGPT/discussions)
 
 ---
-
+DEPLOYMENT LINK:research-gpt-rg4i.vercel.app
 **Built with ❤️ using AI, FastAPI, and React**
 
 ⭐ Star us on GitHub!
