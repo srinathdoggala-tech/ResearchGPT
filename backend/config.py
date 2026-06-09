@@ -6,30 +6,31 @@ import logging
 class Settings(BaseSettings):
     """Application settings"""
 
-    # Gemini Configuration
+    # API Keys
     gemini_api_key: str = ""
+    tavily_api_key: str = ""
 
-    # Optional (keep if other code still references them)
+    # Optional Providers
     openai_api_key: str = ""
     anthropic_api_key: str = ""
 
-    llm_model: str = "gemini-1.5-flash"
+    # LLM Configuration
+    llm_model: str = "gemini-2.5-flash"
     temperature: float = 0.7
 
     # Search
-    tavily_api_key: str = ""
     search_max_results: int = 5
 
     # Server
-    debug: bool = True
+    debug: bool = False
     host: str = "0.0.0.0"
     port: int = 8000
-    workers: int = 4
+    workers: int = 1
 
     # CORS
     cors_origins: List[str] = [
         "http://localhost:3000",
-        "http://localhost:5173"
+        "http://localhost:5173",
     ]
 
     # Database
@@ -38,16 +39,18 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": False,
+        "extra": "ignore",
+    }
 
 
 settings = Settings()
 
 logging.basicConfig(
-    level=getattr(logging, settings.log_level),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=getattr(logging, settings.log_level.upper(), logging.INFO),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 logger = logging.getLogger(__name__)
