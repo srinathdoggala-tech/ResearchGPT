@@ -1,5 +1,5 @@
 fastapi==0.115.6
-pydantic==2.10.6
+pydantic==2.9.2
 pydantic-settings==2.7.1
 uvicorn[standard]==0.34.0
 python-dotenv==1.0.1
@@ -9,3 +9,4 @@ requests==2.32.3
 tavily-python==0.7.25
 google-generativeai==0.8.3
 typing-extensions==4.12.2
+pydantic-core==2.23.4
