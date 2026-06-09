@@ -39,8 +39,8 @@ interface ResearchResult {
 }
 
 const API_BASE_URL =
-  (import.meta as any).env?.VITE_API_URL ||
-  "http://";
+  import.meta.env.VITE_API_URL ||
+  "https://researchgpt-backend-vxij.onrender.com";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
@@ -56,24 +56,28 @@ function App() {
     setLoading(true);
     setError(null);
     setCurrentTopic(topic);
-    
-    // Initialize a clean default result structure to append streamed results safely
+
     const runningResult: ResearchResult = {
       status: "processing",
       topic,
       plan: { research_questions: [] },
-      findings: { findings: "GATHERING FINDINGS...", sources: [] },
+      findings: {
+        findings: "GATHERING FINDINGS...",
+        sources: [],
+      },
       verification: null,
-      report: { report: "", word_count: 0 }
+      report: {
+        report: "",
+        word_count: 0,
+      },
     };
 
     try {
-      // Connect directly to the streaming endpoint to bypass Vercel serverless timeouts
       const response = await fetch(`${API_BASE_URL}/research/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },localhost:8000
+        },
         body: JSON.stringify({
           topic,
           style,
@@ -82,32 +86,42 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`Research stream initialization failed: ${response.status}`);
+        throw new Error(
+          `Research stream initialization failed: ${response.status}`
+        );
       }
 
       if (!response.body) {
-        throw new Error("ReadableStream not supported by the hosting gateway.");
+        throw new Error(
+          "ReadableStream not supported by the hosting gateway."
+        );
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+
       let finished = false;
       let buffer = "";
 
       while (!finished) {
         const { value, done } = await reader.read();
+
         finished = done;
+
         if (value) {
-          buffer += decoder.decode(value, { stream: !done });
+          buffer += decoder.decode(value, {
+            stream: !done,
+          });
+
           const lines = buffer.split("\n");
-          
-          // Save the last incomplete line back to the chunk buffer
+
           buffer = lines.pop() || "";
 
           for (const line of lines) {
             const cleanLine = line.trim();
+
             if (!cleanLine.startsWith("data: ")) continue;
-            
+
             try {
               const rawJson = cleanLine.replace("data: ", "");
               const parsed = JSON.parse(rawJson);
@@ -116,34 +130,48 @@ function App() {
                 throw new Error(parsed.error);
               }
 
-              // Append streamed output data blocks securely into the interface display wrapper
               if (parsed.content) {
                 runningResult.report.report += parsed.content;
-                runningResult.report.word_count = runningResult.report.report.split(/\s+/).filter(Boolean).length;
-                
-                // Keep status text moving during step checkpoints
-                if (parsed.content.includes("📋")) runningResult.status = "Planning...";
-                if (parsed.content.includes("🔍")) runningResult.status = "Searching Web...";
-                if (parsed.content.includes("✓")) runningResult.status = "Fact Checking...";
-                if (parsed.content.includes("✍️")) runningResult.status = "Writing Final Report...";
+
+                runningResult.report.word_count =
+                  runningResult.report.report
+                    .split(/\s+/)
+                    .filter(Boolean).length;
+
+                if (parsed.content.includes("📋")) {
+                  runningResult.status = "Planning...";
+                }
+
+                if (parsed.content.includes("🔍")) {
+                  runningResult.status = "Searching Web...";
+                }
+
+                if (parsed.content.includes("✓")) {
+                  runningResult.status = "Fact Checking...";
+                }
+
+                if (parsed.content.includes("✍️")) {
+                  runningResult.status = "Writing Final Report...";
+                }
 
                 setResults({ ...runningResult });
               }
-            } catch (e) {
-              // Ignore partial chunk syntax errors during transit
+            } catch {
+              // Ignore partial stream chunks
             }
           }
         }
       }
-      
-      // Mark workflow as successfully finalized once stream returns closed state
+
       runningResult.status = "success";
       setResults({ ...runningResult });
-
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Unexpected stream network error occurred"
+        err instanceof Error
+          ? err.message
+          : "Unexpected stream network error occurred"
       );
+
       setResults(null);
     } finally {
       setLoading(false);
@@ -174,21 +202,28 @@ function App() {
       setResults({
         status: "success",
         topic,
-        plan: { research_questions: [] },
+        plan: {
+          research_questions: [],
+        },
         findings: {
           findings: data?.findings ?? "",
-          sources: data?.sources ?? []
+          sources: data?.sources ?? [],
         },
         verification: null,
         report: {
           report: data?.findings ?? "",
-          word_count: data?.findings ? String(data.findings).split(/\s+/).filter(Boolean).length : 0
+          word_count: data?.findings
+            ? String(data.findings).split(/\s+/).filter(Boolean).length
+            : 0,
         },
       });
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Unexpected error occurred"
+        err instanceof Error
+          ? err.message
+          : "Unexpected error occurred"
       );
+
       setResults(null);
     } finally {
       setLoading(false);
@@ -202,6 +237,7 @@ function App() {
           <h1 className="text-4xl font-bold text-indigo-600">
             ResearchGPT
           </h1>
+
           <p className="text-gray-600 mt-2">
             Multi-Agent AI Research Assistant
           </p>
