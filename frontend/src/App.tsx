@@ -40,7 +40,7 @@ interface ResearchResult {
 
 const API_BASE_URL =
   (import.meta as any).env?.VITE_API_URL ||
-  "http://localhost:8000";
+  "http://";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
@@ -73,7 +73,7 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },
+        },localhost:8000
         body: JSON.stringify({
           topic,
           style,
