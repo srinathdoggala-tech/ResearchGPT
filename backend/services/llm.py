@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class LLMService:
     def __init__(self):
         self.model = None
+        self.model_name = None
         self._init_model()
 
     def _init_model(self):
@@ -25,11 +26,20 @@ class LLMService:
 
             genai.configure(api_key=api_key)
 
-            model_name = getattr(settings, "llm_model", None) or "gemini-1.5-flash"
+            # Force a supported model
+            self.model_name = (
+                os.getenv("LLM_MODEL")
+                or getattr(settings, "llm_model", None)
+                or "gemini-2.5-flash"
+            )
 
-            self.model = genai.GenerativeModel(model_name)
+            logger.info(f"Attempting Gemini model: {self.model_name}")
 
-            logger.info(f"✓ Gemini initialized successfully: {model_name}")
+            self.model = genai.GenerativeModel(self.model_name)
+
+            logger.info(
+                f"✓ Gemini initialized successfully: {self.model_name}"
+            )
 
         except Exception as e:
             logger.error(f"Gemini initialization failed: {e}")
@@ -54,41 +64,20 @@ class LLMService:
             else prompt
         )
 
-        max_retries = 3
+        try:
+            response = await asyncio.to_thread(
+                self.model.generate_content,
+                final_prompt
+            )
 
-        for attempt in range(max_retries):
-            try:
-                response = await asyncio.to_thread(
-                    self.model.generate_content,
-                    final_prompt
-                )
+            if hasattr(response, "text") and response.text:
+                return response.text
 
-                if hasattr(response, "text"):
-                    return response.text
+            return "[No text response generated]"
 
-                return "[No text response generated]"
-
-            except Exception as e:
-                error_msg = str(e)
-
-                logger.error(
-                    f"Gemini error ({attempt + 1}/{max_retries}): {error_msg}"
-                )
-
-                if (
-                    "429" in error_msg
-                    or "quota" in error_msg.lower()
-                    or "rate limit" in error_msg.lower()
-                ):
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep(5 * (attempt + 1))
-                        continue
-
-                    return "AI rate limit reached. Please retry later."
-
-                return f"[LLM ERROR] {error_msg}"
-
-        return "[LLM ERROR] Retry limit exceeded"
+        except Exception as e:
+            logger.error(f"Gemini generation failed: {e}")
+            return f"[LLM ERROR] {str(e)}"
 
     async def stream_text(
         self,
@@ -127,5 +116,4 @@ class LLMService:
             yield f"[STREAM ERROR] {str(e)}"
 
 
-# Singleton instance
 llm_service = LLMService()
