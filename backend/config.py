@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # Server
     debug: bool = False
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8001
     workers: int = 1
 
     # CORS

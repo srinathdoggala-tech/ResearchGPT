@@ -40,7 +40,7 @@ interface ResearchResult {
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
+  "http://localhost:8001";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
