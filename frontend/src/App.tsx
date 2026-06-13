@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SearchForm from "./components/SearchForm";
 import ResultsDisplay from "./components/ResultsDisplay";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -40,7 +40,7 @@ interface ResearchResult {
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://researchgpt-backend-vxij.onrender.com";
+  "http://localhost:8000";
 
 function App() {
   const [results, setResults] = useState<ResearchResult | null>(null);
