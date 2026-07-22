@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p . --noEmit && vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "type-check": "tsc -p . --noEmit",
-    "lint": "eslint src --ext ts,tsx"
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "test": "npm --prefix frontend run test",
+    "type-check": "npm --prefix frontend run type-check",
+    "lint": "npm --prefix frontend run lint"
   },
   "dependencies": {
     "react": "^18.2.0",

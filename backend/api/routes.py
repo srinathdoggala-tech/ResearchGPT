@@ -82,7 +82,10 @@ async def research_stream(request: ResearchRequest):
             )
             
             async for chunk in workflow.execute_stream():
-                yield f"data: {json.dumps({'content': chunk})}\n\n"
+                if isinstance(chunk, dict):
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'report', 'content': chunk})}\n\n"
         
         except Exception as e:
             logger.error(f"Streaming research failed: {e}")
@@ -172,7 +175,7 @@ async def verify_content(
 @router.post("/summarize")
 async def summarize_content(
     content: str = Query(..., description="Content to summarize"),
-    length: str = Query("medium", regex="^(short|medium|long)$")
+    length: str = Query("medium", pattern="^(short|medium|long)$")
 ):
     """
     Summarize content

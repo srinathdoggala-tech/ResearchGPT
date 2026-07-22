@@ -86,7 +86,7 @@ class ResearchWorkflow:
             logger.error(f"Workflow failed: {e}")
             return {"status": "failed", "error": str(e)}
     
-    async def execute_stream(self) -> AsyncGenerator[str, None]:
+    async def execute_stream(self) -> AsyncGenerator[Any, None]:
         """
         Execute workflow with streaming output
         
@@ -95,35 +95,35 @@ class ResearchWorkflow:
         """
         try:
             # Step 1: Planning
-            yield "📋 Planning research...\n"
+            yield {"type": "status", "status": "Planning...", "content": "📋 Planning research..."}
             self.state = WorkflowState.PLANNING
             plan = await planner_agent.plan(self.topic)
             self.results["plan"] = plan
-            yield f"Plan: {len(plan.get('research_questions', []))} research questions identified\n\n"
+            yield {"type": "plan", "plan": plan}
             
             # Step 2: Research
-            yield "🔍 Conducting research...\n"
+            yield {"type": "status", "status": "Searching Web...", "content": "🔍 Conducting research..."}
             self.state = WorkflowState.RESEARCHING
             findings = await researcher_agent.research(
                 query=self.topic,
                 context=plan.get("research_questions", [])[0] if plan.get("research_questions") else ""
             )
             self.results["findings"] = findings
-            yield f"Found {findings['source_count']} sources\n\n"
+            yield {"type": "findings", "findings": findings}
             
             # Step 3: Verification
             if self.include_verification:
-                yield "✓ Verifying findings...\n"
+                yield {"type": "status", "status": "Fact Checking...", "content": "✓ Verifying findings..."}
                 self.state = WorkflowState.VERIFYING
                 verification = await verifier_agent.verify(
                     content=findings.get("findings", ""),
                     claims=None
                 )
                 self.results["verification"] = verification
-                yield "Verification complete\n\n"
+                yield {"type": "verification", "verification": verification}
             
             # Step 4: Writing (streamed)
-            yield "✍️ Writing report...\n\n"
+            yield {"type": "status", "status": "Writing Final Report...", "content": "✍️ Writing report..."}
             self.state = WorkflowState.WRITING
             
             async for chunk in writer_agent.write_stream(
@@ -131,15 +131,15 @@ class ResearchWorkflow:
                 findings=findings,
                 style=self.style
             ):
-                yield chunk
+                yield {"type": "report", "content": chunk}
             
             self.state = WorkflowState.COMPLETED
-            yield "\n\n✅ Research completed!"
+            yield {"type": "status", "status": "success", "content": "✅ Research completed!"}
         
         except Exception as e:
             self.state = WorkflowState.FAILED
             logger.error(f"Streaming workflow failed: {e}")
-            yield f"\n\n❌ Error: {str(e)}"
+            yield {"type": "error", "error": str(e)}
     
     def _format_results(self) -> Dict[str, Any]:
         """Format workflow results"""

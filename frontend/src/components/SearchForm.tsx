@@ -1,94 +1,123 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 interface SearchFormProps {
-  onSearch: (topic: string, style: string, includeVerification: boolean) => void
-  onQuickSearch: (topic: string) => void
-  loading: boolean
+  onSearch: (topic: string, style: string, includeVerification: boolean) => void;
+  onQuickSearch: (topic: string) => void;
+  loading: boolean;
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, onQuickSearch, loading }) => {
-  const [topic, setTopic] = useState('')
-  const [style, setStyle] = useState('academic')
-  const [includeVerification, setIncludeVerification] = useState(true)
+const SearchForm: React.FC<SearchFormProps> = ({
+  onSearch,
+  onQuickSearch,
+  loading,
+}) => {
+  const [topic, setTopic] = useState("");
+  const [style, setStyle] = useState("academic");
+  const [includeVerification, setIncludeVerification] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (topic.trim()) {
-      onSearch(topic, style, includeVerification)
+      onSearch(topic, style, includeVerification);
     }
-  }
+  };
 
   const handleQuickSubmit = () => {
     if (topic.trim()) {
-      onQuickSearch(topic)
+      onQuickSearch(topic);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Topic Input */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Research Topic</label>
-        <input
-          type="text"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter your research topic..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-          disabled={loading}
-        />
+        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          Research Query / Topic
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="e.g. Impact of AI on Semiconductor Supply Chains"
+            className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/70 text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition duration-200 text-sm shadow-inner"
+            disabled={loading}
+          />
+          {topic && (
+            <button
+              type="button"
+              onClick={() => setTopic("")}
+              className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 text-xs bg-slate-800 rounded-full w-5 h-5 flex items-center justify-center"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Writing Style */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Writing Style</label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          Report Output Style
+        </label>
         <select
           value={style}
           onChange={(e) => setStyle(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+          className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700/70 text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition duration-200 text-sm cursor-pointer"
           disabled={loading}
         >
-          <option value="academic">Academic</option>
-          <option value="journalistic">Journalistic</option>
-          <option value="summary">Summary</option>
+          <option value="academic" className="bg-slate-900 text-slate-200">
+            🎓 Academic & Detailed
+          </option>
+          <option value="journalistic" className="bg-slate-900 text-slate-200">
+            📰 Journalistic & Concise
+          </option>
+          <option value="summary" className="bg-slate-900 text-slate-200">
+            ⚡ Executive Summary
+          </option>
         </select>
       </div>
 
       {/* Verification Toggle */}
-      <div className="flex items-center">
+      <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
         <input
           type="checkbox"
           id="verification"
           checked={includeVerification}
           onChange={(e) => setIncludeVerification(e.target.checked)}
-          className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+          className="w-4 h-4 text-indigo-600 bg-slate-900 border-slate-700 rounded focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
           disabled={loading}
         />
-        <label htmlFor="verification" className="ml-2 text-sm text-gray-700">
-          Include Verification
+        <label
+          htmlFor="verification"
+          className="text-xs text-slate-300 font-medium cursor-pointer select-none"
+        >
+          Enable Cross-Source Fact Verification
         </label>
       </div>
 
-      {/* Buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <button
           type="submit"
           disabled={loading || !topic.trim()}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition"
+          className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 text-sm active:scale-95"
         >
-          {loading ? 'Researching...' : 'Full Research'}
+          <span>{loading ? "⚙️ Processing..." : "🧠 Full Research"}</span>
         </button>
+
         <button
           type="button"
           onClick={handleQuickSubmit}
           disabled={loading || !topic.trim()}
-          className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition"
+          className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 disabled:opacity-50 text-slate-200 font-semibold py-3 px-4 rounded-xl transition duration-300 flex items-center justify-center space-x-2 text-sm active:scale-95"
         >
-          {loading ? 'Searching...' : 'Quick Search'}
+          <span>⚡ Quick Search</span>
         </button>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default SearchForm
+export default SearchForm;
