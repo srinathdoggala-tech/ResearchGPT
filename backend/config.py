@@ -1,6 +1,9 @@
-from pydantic_settings import BaseSettings
-from typing import List
+import os
+import json
 import logging
+from typing import List, Union
+from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -15,7 +18,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
 
     # LLM Configuration
-    llm_model: str = "gemini-2.5-flash"
+    llm_model: str = "gemini-1.5-flash"
     temperature: float = 0.7
 
     # Search
@@ -27,17 +30,36 @@ class Settings(BaseSettings):
     port: int = 8001
     workers: int = 1
 
-    # CORS
-    cors_origins: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-    ]
+    # CORS - Allow all origins by default for seamless Vercel deployment
+    cors_origins: List[str] = ["*"]
 
     # Database
     database_url: str = "sqlite:///./research.db"
 
     # Logging
     log_level: str = "INFO"
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug(cls, v):
+        if isinstance(v, str):
+            return v.lower() in ("true", "1", "t", "yes", "y", "debug", "development")
+        return bool(v)
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if not v or v == "*":
+                return ["*"]
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [item.strip() for item in v.split(",") if item.strip()]
+        return v
 
     model_config = {
         "env_file": ".env",

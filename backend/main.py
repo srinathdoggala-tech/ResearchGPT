@@ -34,19 +34,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Robust CORS Configuration for Vercel
+# Robust CORS Configuration for Vercel and local development
+origins = settings.cors_origins
+allow_all = "*" in origins or not origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all else origins,
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include Core Multi-Agent Base Router
+# Include Core Multi-Agent Base Router (with and without /api prefix for Vercel gateway compatibility)
 app.include_router(router, prefix="/api")
+app.include_router(router)
 
 @app.get("/")
+@app.get("/api")
 async def root():
     return {
         "message": "ResearchGPT API Running",
@@ -56,6 +61,7 @@ async def root():
     }
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {
         "status": "healthy",

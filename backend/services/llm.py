@@ -3,7 +3,10 @@ import asyncio
 import os
 from typing import Optional, AsyncGenerator
 
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except Exception:
+    genai = None
 
 from config import settings
 
@@ -18,6 +21,10 @@ class LLMService:
 
     def _init_model(self):
         try:
+            if genai is None:
+                logger.warning("google-generativeai library is not installed")
+                return
+
             api_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
 
             if not api_key:
@@ -30,7 +37,7 @@ class LLMService:
             self.model_name = (
                 os.getenv("LLM_MODEL")
                 or getattr(settings, "llm_model", None)
-                or "gemini-2.5-flash"
+                or "gemini-1.5-flash"
             )
 
             logger.info(f"Attempting Gemini model: {self.model_name}")
