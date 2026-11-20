@@ -1,8 +1,21 @@
 # ResearchGPT: Multi-Agent AI Research Assistant
 
-![ResearchGPT](https://img.shields.io/badge/AI-Research-blue) ![Python](https://img.shields.io/badge/Python-3.11-green) ![FastAPI](https://img.shields.io/badge/FastAPI-0.104-red) ![React](https://img.shields.io/badge/React-18-blue) ![License](https://img.shields.io/badge/License-MIT-green)
+![ResearchGPT](https://img.shields.io/badge/AI-Research-blue) ![Python](https://img.shields.io/badge/Python-3.12-green) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-red) ![React](https://img.shields.io/badge/React-18-blue) ![License](https://img.shields.io/badge/License-MIT-green)
 
 A production-ready, multi-agent AI research assistant that demonstrates cutting-edge LLM applications, agent orchestration, RAG systems, and full-stack development.
+
+## 🎬 Demonstration
+
+<div align="center">
+  <video src="assets/Demonstration.mp4" width="100%" controls="controls" poster="assets/demo-thumbnail.png">
+    Your browser does not support the video tag.
+  </video>
+  <br />
+  <p>
+    <a href="assets/Demonstration.mp4">▶️ <strong>Click here to view / play the Demonstration Video (MP4)</strong></a>
+  </p>
+  <p><em>Comprehensive walk-through showcasing multi-agent planning, real-time web exploration, fact verification, and streaming report synthesis.</em></p>
+</div>
 
 ## 🎯 Features
 

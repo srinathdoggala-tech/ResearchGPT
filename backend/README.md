@@ -1,5 +1,9 @@
 # Backend Documentation
 
+## 🎬 Demonstration
+
+A complete demonstration of the ResearchGPT multi-agent research pipeline is available at [`../assets/Demonstration.mp4`](../assets/Demonstration.mp4).
+
 ## Setup
 
 ```bash
