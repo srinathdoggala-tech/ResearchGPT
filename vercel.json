@@ -3,7 +3,8 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.py": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "excludeFiles": "{node_modules/**,frontend/**,assets/**,dist/**,backend/tests/**,.git/**}"
     }
   },
   "rewrites": [
